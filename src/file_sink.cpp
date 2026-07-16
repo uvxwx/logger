@@ -19,7 +19,7 @@ Expected<std::unique_ptr<Sink>, Error> FileSink::Make(
     };
   }
 
-  std::ofstream stream(path, std::ios::app);
+  std::ofstream stream{path, std::ios::app};
   if (!stream.is_open()) {
     return Error{
         LogError::kSystemError,
@@ -27,7 +27,7 @@ Expected<std::unique_ptr<Sink>, Error> FileSink::Make(
     };
   }
 
-  return std::unique_ptr<Sink>(new FileSink(path, std::move(stream)));
+  return std::unique_ptr<Sink>{new FileSink{path, std::move(stream)}};
 }
 
 // Форматирует и записывает одну строку в файл.

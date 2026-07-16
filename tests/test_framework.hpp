@@ -39,21 +39,21 @@ void ExpectEqual(const Left& left, const Right& right, const char* left_expr,
   if (!(left == right)) {
     std::ostringstream stream;
     stream << "expected equality: " << left_expr << " == " << right_expr;
-    throw Failure(stream.str());
+    throw Failure{stream.str()};
   }
 }
 
 // Проверяет истинность выражения.
 inline void ExpectTrue(const bool condition, const char* expression) {
   if (!condition) {
-    throw Failure(std::string("expected true: ") + expression);
+    throw Failure{std::string{"expected true: "} + expression};
   }
 }
 
 // Проверяет ложность выражения.
 inline void ExpectFalse(const bool condition, const char* expression) {
   if (condition) {
-    throw Failure(std::string("expected false: ") + expression);
+    throw Failure{std::string{"expected false: "} + expression};
   }
 }
 
@@ -64,7 +64,7 @@ inline void ExpectContains(const std::string& haystack,
   if (haystack.find(needle) == std::string::npos) {
     std::ostringstream stream;
     stream << "expected " << haystack_expr << " to contain " << needle_expr;
-    throw Failure(stream.str());
+    throw Failure{stream.str()};
   }
 }
 

@@ -42,7 +42,7 @@ class SocketHandle {
 TEST(UdpSinkSendsSerializedDatagram) {
   const int server_fd = ::socket(AF_INET, SOCK_DGRAM, 0);
   EXPECT_TRUE(server_fd >= 0);
-  SocketHandle socket_handle(server_fd);
+  SocketHandle socket_handle{server_fd};
 
   ::sockaddr_in address{};
   address.sin_family = AF_INET;
@@ -75,8 +75,8 @@ TEST(UdpSinkSendsSerializedDatagram) {
   EXPECT_TRUE(received > 0);
 
   auto record = logger::DeserializeRecord(
-      std::string_view(buffer, static_cast<std::size_t>(received)));
+      std::string_view{buffer, static_cast<std::size_t>(received)});
   EXPECT_TRUE(record);
-  EXPECT_EQ(record.Value().message, std::string("udp-message"));
+  EXPECT_EQ(record.Value().message, std::string{"udp-message"});
   EXPECT_EQ(record.Value().level, logger::LogLevel::kInfo);
 }

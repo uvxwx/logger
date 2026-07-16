@@ -100,7 +100,7 @@ std::size_t Statistics::LevelIndex(const LogLevel level) noexcept {
 
 // Формирует человекочитаемый текст статистики.
 std::string FormatStatistics(const Statistics& statistics) {
-  std::ostringstream stream;
+  std::ostringstream stream{};
   stream << "Statistics\n"
          << "  Total messages: " << statistics.TotalMessages() << '\n'
          << "  Debug: " << statistics.MessagesByLevel(LogLevel::kDebug) << '\n'

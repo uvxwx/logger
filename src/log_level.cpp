@@ -16,7 +16,7 @@ constexpr std::array<std::string_view, 3> kLevelNames = {
 
 // Переводит строку в нижний регистр для разбора уровня.
 std::string ToLowerCopy(std::string_view value) {
-  std::string lowered(value);
+  std::string lowered{value};
   std::transform(
       lowered.begin(), lowered.end(), lowered.begin(),
       [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });

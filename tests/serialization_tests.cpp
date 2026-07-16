@@ -15,7 +15,7 @@ TEST(SerializeRoundTripPreservesRecord) {
   auto output = logger::DeserializeRecord(serialized.Value());
   EXPECT_TRUE(output);
   EXPECT_EQ(output.Value().level, logger::LogLevel::kError);
-  EXPECT_EQ(output.Value().message, std::string("payload"));
+  EXPECT_EQ(output.Value().message, std::string{"payload"});
   EXPECT_EQ(output.Value().timestamp, input.timestamp);
 }
 
@@ -45,7 +45,8 @@ TEST(SerializeRoundTripSupportsEmptyPayload) {
 
 // Проверяет отказ для слишком большого сообщения.
 TEST(SerializeRejectsOversizedPayload) {
-  std::string oversized(logger::kMaxUdpMessageSize + 1U, 'x');
+  std::string oversized{};
+  oversized.assign(logger::kMaxUdpMessageSize + 1U, 'x');
   auto result = logger::SerializeRecord(test::MakeRecord(oversized));
 
   EXPECT_FALSE(result);
@@ -54,7 +55,8 @@ TEST(SerializeRejectsOversizedPayload) {
 
 // Проверяет отказ для неизвестного кода уровня.
 TEST(DeserializeRejectsUnknownLevel) {
-  std::string payload(13, '\0');
+  std::string payload{};
+  payload.assign(13, '\0');
   payload[0] = static_cast<char>(9);
 
   auto result = logger::DeserializeRecord(payload);

@@ -14,7 +14,7 @@ class BlockingQueue {
   // Добавляет элемент в хвост очереди.
   void Push(T value) {
     {
-      std::lock_guard<std::mutex> lock(mutex_);
+      std::lock_guard<std::mutex> lock{mutex_};
       queue_.push(std::move(value));
     }
 
@@ -23,7 +23,7 @@ class BlockingQueue {
 
   // Ждет появления элемента и возвращает его.
   T WaitPop() {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::mutex> lock{mutex_};
     cv_.wait(lock, [this] { return !queue_.empty(); });
 
     T value = std::move(queue_.front());

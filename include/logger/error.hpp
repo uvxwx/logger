@@ -48,7 +48,7 @@ inline std::string DescribeError(const Error& error) {
     return *error.message;
   }
 
-  return std::string(ToString(error.code));
+  return std::string{ToString(error.code)};
 }
 
 }  // namespace logger

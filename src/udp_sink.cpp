@@ -38,19 +38,19 @@ Expected<std::unique_ptr<Sink>, Error> UdpSink::Make(std::string host,
   hints.ai_socktype = SOCK_DGRAM;
 
   ::addrinfo* result = nullptr;
-  std::string service = MakeServiceName(port);
+  std::string service{MakeServiceName(port)};
   int getaddrinfo_result =
       ::getaddrinfo(host.c_str(), service.c_str(), &hints, &result);
   if (getaddrinfo_result != 0) {
     return Error{
         LogError::kSystemError,
-        std::string("getaddrinfo failed: ") +
+        std::string{"getaddrinfo failed: "} +
             ::gai_strerror(getaddrinfo_result),
     };
   }
 
   int socket_fd = -1;
-  std::string address_bytes;
+  std::string address_bytes{};
   for (::addrinfo* entry = result; entry != nullptr; entry = entry->ai_next) {
     int fd = ::socket(entry->ai_family, entry->ai_socktype, entry->ai_protocol);
     if (fd < 0) {
@@ -72,8 +72,8 @@ Expected<std::unique_ptr<Sink>, Error> UdpSink::Make(std::string host,
     };
   }
 
-  return std::unique_ptr<Sink>(
-      new UdpSink(std::move(host), port, socket_fd, std::move(address_bytes)));
+  return std::unique_ptr<Sink>{
+      new UdpSink{std::move(host), port, socket_fd, std::move(address_bytes)}};
 }
 
 // Закрывает сокет отправки.
@@ -98,7 +98,7 @@ Expected<void, Error> UdpSink::Write(const LogRecord& record) noexcept {
   if (sent < 0 || static_cast<std::size_t>(sent) != serialized.Value().size()) {
     return Error{
         LogError::kWriteFailed,
-        std::string("sendto failed: ") + std::strerror(errno),
+        std::string{"sendto failed: "} + std::strerror(errno),
     };
   }
 

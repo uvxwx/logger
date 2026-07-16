@@ -39,12 +39,12 @@ Expected<void, Error> Logger::Log(const std::string_view message,
   LogRecord record{
       std::chrono::system_clock::now(),
       level,
-      std::string(message),
+      std::string{message},
   };
 
   // Сам sink защищаем отдельным mutex, чтобы записи не перемешивались при
   // параллельной записи.
-  std::lock_guard<std::mutex> lock(sink_mutex_);
+  std::lock_guard<std::mutex> lock{sink_mutex_};
   return sink_->Write(record);
 }
 

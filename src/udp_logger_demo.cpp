@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  auto min_level = logger::ParseLogLevel(std::string_view(argv[3]));
+  auto min_level = logger::ParseLogLevel(std::string_view{argv[3]});
   if (!min_level.has_value()) {
     std::cerr << "invalid minimum level: " << argv[3] << '\n';
     return 1;

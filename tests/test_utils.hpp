@@ -23,9 +23,9 @@ inline std::filesystem::path MakeTempPath(const std::string& prefix) {
 
 // Читает весь файл в строку.
 inline std::string ReadFile(const std::filesystem::path& path) {
-  std::ifstream input(path);
-  return std::string((std::istreambuf_iterator<char>(input)),
-                     std::istreambuf_iterator<char>());
+  std::ifstream input{path};
+  return std::string{std::istreambuf_iterator<char>{input},
+                     std::istreambuf_iterator<char>{}};
 }
 
 // Создает тестовую запись с фиксированным временем.
@@ -33,7 +33,7 @@ inline logger::LogRecord MakeRecord(
     std::string message,
     const logger::LogLevel level = logger::LogLevel::kInfo) {
   return {std::chrono::system_clock::time_point(
-              std::chrono::milliseconds(1'721'138'371'482)),
+              std::chrono::milliseconds{1'721'138'371'482}),
           level, std::move(message)};
 }
 

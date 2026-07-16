@@ -70,7 +70,7 @@ logger::Expected<std::uint16_t, logger::Error> ParseNonZeroUint16(
   if (value.Value() == 0) {
     return logger::Error{
         logger::LogError::kInvalidArgument,
-        "invalid " + std::string(field_name),
+        "invalid " + std::string{field_name},
     };
   }
 
@@ -88,7 +88,7 @@ logger::Expected<std::uint64_t, logger::Error> ParseNonZeroUint64(
   if (value.Value() == 0) {
     return logger::Error{
         logger::LogError::kInvalidArgument,
-        "invalid " + std::string(field_name),
+        "invalid " + std::string{field_name},
     };
   }
 
@@ -104,13 +104,13 @@ logger::Expected<SocketHandle, logger::Error> BindUdpSocket(
   hints.ai_flags = AI_PASSIVE;
 
   ::addrinfo* result = nullptr;
-  std::string service = logger::ToCharsString(port);
-  int getaddrinfo_result = ::getaddrinfo(std::string(host).c_str(),
+  std::string service{logger::ToCharsString(port)};
+  int getaddrinfo_result = ::getaddrinfo(std::string{host}.c_str(),
                                          service.c_str(), &hints, &result);
   if (getaddrinfo_result != 0) {
     return logger::Error{
         logger::LogError::kSystemError,
-        std::string("getaddrinfo failed: ") +
+        std::string{"getaddrinfo failed: "} +
             ::gai_strerror(getaddrinfo_result),
     };
   }
@@ -123,12 +123,12 @@ logger::Expected<SocketHandle, logger::Error> BindUdpSocket(
     if (fd < 0) {
       last_error = logger::Error{
           logger::LogError::kSystemError,
-          std::string("socket failed: ") + std::strerror(errno),
+          std::string{"socket failed: "} + std::strerror(errno),
       };
       continue;
     }
 
-    SocketHandle candidate(fd);
+    SocketHandle candidate{fd};
     if (::bind(candidate.Get(), entry->ai_addr, entry->ai_addrlen) == 0) {
       ::freeaddrinfo(result);
       return candidate;
@@ -136,7 +136,7 @@ logger::Expected<SocketHandle, logger::Error> BindUdpSocket(
 
     last_error = logger::Error{
         logger::LogError::kSystemError,
-        std::string("bind failed: ") + std::strerror(errno),
+        std::string{"bind failed: "} + std::strerror(errno),
     };
   }
 
@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
 
   logger::Statistics statistics;
   std::uint64_t messages_since_output = 0;
-  auto timeout = std::chrono::seconds(timeout_seconds.Value());
+  auto timeout = std::chrono::seconds{timeout_seconds.Value()};
   auto next_deadline = std::chrono::steady_clock::now() + timeout;
   std::array<char, logger::kMaxUdpMessageSize + 32U> buffer{};
 
@@ -251,7 +251,7 @@ int main(int argc, char** argv) {
     }
 
     auto payload =
-        std::string_view(buffer.data(), static_cast<std::size_t>(received));
+        std::string_view{buffer.data(), static_cast<std::size_t>(received)};
     auto result = logger::DeserializeRecord(payload);
     if (!result) {
       std::cerr << "malformed datagram: "

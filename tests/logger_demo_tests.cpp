@@ -10,14 +10,14 @@
 // Проверяет обработку ввода и смену уровня во время работы.
 TEST(LoggerDemoProcessesInputAndRuntimeLevelChanges) {
   auto path = test::MakeTempPath("logger_demo");
-  std::istringstream input(
+  std::istringstream input{
       "debug hidden\n"
       "info visible\n"
       ":level debug\n"
       "debug shown\n"
-      ":quit\n");
-  std::ostringstream output;
-  std::ostringstream error;
+      ":quit\n"};
+  std::ostringstream output{};
+  std::ostringstream error{};
 
   auto sink = logger::FileSink::Make(path);
   EXPECT_TRUE(sink);
@@ -46,14 +46,14 @@ TEST(ParseInputLineRecognizesCommandsAndLevels) {
       logger::ParseInputLine("debug hello world");
   EXPECT_EQ(log_action.kind, logger::InputActionKind::kLogMessage);
   EXPECT_EQ(log_action.log_command.level.value(), logger::LogLevel::kDebug);
-  EXPECT_EQ(log_action.log_command.message, std::string("hello world"));
+  EXPECT_EQ(log_action.log_command.message, std::string{"hello world"});
 }
 
 // Проверяет ошибку запуска консольного логгера без sink.
 TEST(LoggerDemoRejectsNullSink) {
-  std::istringstream input;
-  std::ostringstream output;
-  std::ostringstream error;
+  std::istringstream input{};
+  std::ostringstream output{};
+  std::ostringstream error{};
 
   const int exit_code = logger::RunConsoleLogger(input, output, error, nullptr,
                                                  logger::LogLevel::kInfo);

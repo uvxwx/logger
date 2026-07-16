@@ -22,12 +22,12 @@ TEST(BlockingQueueConsumerWaitsForData) {
   std::atomic<bool> popped{false};
   int value = 0;
 
-  std::thread consumer([&queue, &popped, &value] {
+  std::thread consumer{[&queue, &popped, &value] {
     value = queue.WaitPop();
     popped.store(true);
-  });
+  }};
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds{50});
   EXPECT_FALSE(popped.load());
   queue.Push(42);
   consumer.join();

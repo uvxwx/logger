@@ -32,7 +32,7 @@ InputAction ParseInputLine(const std::string_view line) {
     const std::string_view level_name = line.substr(7);
     auto level = ParseLogLevel(level_name);
     if (!level.has_value()) {
-      return MakeInvalidAction("invalid level: " + std::string(level_name));
+      return MakeInvalidAction("invalid level: " + std::string{level_name});
     }
 
     InputAction action;
@@ -42,7 +42,7 @@ InputAction ParseInputLine(const std::string_view line) {
   }
 
   if (!line.empty() && line.front() == ':') {
-    return MakeInvalidAction("unknown command: " + std::string(line));
+    return MakeInvalidAction("unknown command: " + std::string{line});
   }
 
   const std::size_t first_space = line.find(' ');
@@ -57,13 +57,13 @@ InputAction ParseInputLine(const std::string_view line) {
     action.log_command.message =
         first_space == std::string_view::npos
             ? ""
-            : std::string(line.substr(first_space + 1));
+            : std::string{line.substr(first_space + 1)};
     return action;
   }
 
   InputAction action;
   action.kind = InputActionKind::kLogMessage;
-  action.log_command.message = std::string(line);
+  action.log_command.message = std::string{line};
   return action;
 }
 
@@ -89,11 +89,11 @@ int RunConsoleLogger(std::istream& input, std::ostream& output,
     return 1;
   }
 
-  Logger logger(std::move(sink), min_level);
+  Logger logger{std::move(sink), min_level};
   BlockingQueue<QueuedCommand> queue;
   std::atomic<bool> write_failed{false};
 
-  std::thread writer([&logger, &queue, &error, &write_failed] {
+  std::thread writer{[&logger, &queue, &error, &write_failed] {
     while (true) {
       QueuedCommand command = queue.WaitPop();
       switch (command.kind) {
@@ -116,7 +116,7 @@ int RunConsoleLogger(std::istream& input, std::ostream& output,
           return;
       }
     }
-  });
+  }};
 
   auto stop_writer = [&queue, &writer] {
     // Завершение по явной команде, а не через специальное
@@ -125,7 +125,7 @@ int RunConsoleLogger(std::istream& input, std::ostream& output,
     writer.join();
   };
 
-  std::string line;
+  std::string line{};
   while (std::getline(input, line)) {
     InputAction action = ParseInputLine(line);
     switch (action.kind) {

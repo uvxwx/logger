@@ -14,13 +14,13 @@ std::string FormatTimestampUtc(
       std::chrono::duration_cast<std::chrono::milliseconds>(
           timestamp.time_since_epoch());
   const auto millisecond_part =
-      milliseconds_since_epoch % std::chrono::seconds(1);
+      milliseconds_since_epoch % std::chrono::seconds{1};
   const std::time_t unix_time = std::chrono::system_clock::to_time_t(timestamp);
 
   std::tm utc_time{};
   gmtime_r(&unix_time, &utc_time);
 
-  std::ostringstream stream;
+  std::ostringstream stream{};
   stream << std::setfill('0') << std::setw(4) << (utc_time.tm_year + 1900)
          << '-' << std::setw(2) << (utc_time.tm_mon + 1) << '-' << std::setw(2)
          << utc_time.tm_mday << 'T' << std::setw(2) << utc_time.tm_hour << ':'
@@ -32,7 +32,7 @@ std::string FormatTimestampUtc(
 
 // Экранирует управляющие символы для однострочного вывода.
 std::string EscapeMessage(const std::string_view message) {
-  std::string escaped;
+  std::string escaped{};
   escaped.reserve(message.size());
 
   for (const char ch : message) {
@@ -60,7 +60,7 @@ std::string EscapeMessage(const std::string_view message) {
 
 // Собирает итоговую текстовую строку записи.
 std::string FormatLogRecordLine(const LogRecord& record) {
-  std::ostringstream stream;
+  std::ostringstream stream{};
   stream << FormatTimestampUtc(record.timestamp) << " ["
          << ToString(record.level) << "] " << EscapeMessage(record.message);
   return stream.str();

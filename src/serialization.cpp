@@ -85,7 +85,7 @@ Expected<std::string, Error> SerializeRecord(const LogRecord& record) noexcept {
     return Error{LogError::kSerializationFailed};
   }
 
-  std::string serialized;
+  std::string serialized{};
   // Буфер собирается вручную, чтобы сетевой формат был фиксированным и
   // платформенно-независимым.
   serialized.reserve(kHeaderSize + record.message.size());
@@ -127,9 +127,9 @@ Expected<LogRecord, Error> DeserializeRecord(
 
   return LogRecord{
       std::chrono::system_clock::time_point(
-          std::chrono::milliseconds(timestamp_millis)),
+          std::chrono::milliseconds{timestamp_millis}),
       level,
-      std::string(payload.substr(kHeaderSize, message_length)),
+      std::string{payload.substr(kHeaderSize, message_length)},
   };
 }
 
