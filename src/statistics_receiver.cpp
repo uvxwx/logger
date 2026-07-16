@@ -18,6 +18,7 @@
 #include "logger/record_formatter.hpp"
 #include "logger/serialization.hpp"
 #include "logger/statistics.hpp"
+#include "statistics_receiver_state.hpp"
 
 namespace {
 
@@ -197,10 +198,10 @@ int main(int argc, char** argv) {
   }
 
   logger::Statistics statistics;
-  std::uint64_t messages_since_output = 0;
   auto timeout = std::chrono::seconds{timeout_seconds.Value()};
   auto next_deadline = std::chrono::steady_clock::now() + timeout;
   std::array<char, logger::kMaxUdpMessageSize + 32U> buffer{};
+  logger::StatisticsReportState report_state;
 
   while (true) {
     auto now = std::chrono::steady_clock::now();
@@ -230,6 +231,7 @@ int main(int argc, char** argv) {
       if (statistics.IsDirty()) {
         PrintStatistics(std::cout, statistics);
         statistics.ClearDirty();
+        report_state.OnReport();
       }
       next_deadline = std::chrono::steady_clock::now() + timeout;
       continue;
@@ -262,12 +264,12 @@ int main(int argc, char** argv) {
     std::cout << logger::FormatLogRecordLine(result.Value()) << '\n';
     statistics.AddMessage(result.Value(), std::chrono::system_clock::now());
     statistics.ExpireOld(std::chrono::system_clock::now());
-    ++messages_since_output;
+    report_state.OnMessage();
 
-    if (messages_since_output >= report_every_n.Value()) {
+    if (report_state.ShouldReportByCount(report_every_n.Value())) {
       PrintStatistics(std::cout, statistics);
-      messages_since_output = 0;
       statistics.ClearDirty();
+      report_state.OnReport();
       next_deadline = std::chrono::steady_clock::now() + timeout;
     }
   }

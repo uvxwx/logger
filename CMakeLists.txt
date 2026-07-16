@@ -79,6 +79,7 @@ add_executable(
   tests/logger_tests.cpp
   tests/queue_tests.cpp
   tests/serialization_tests.cpp
+  tests/statistics_receiver_tests.cpp
   tests/statistics_tests.cpp
   tests/test_main.cpp
   tests/udp_sink_tests.cpp)
