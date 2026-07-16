@@ -1,0 +1,7 @@
+build/
+build-*/
+*.log
+*.tmp
+*.swp
+.DS_Store
+.cache/

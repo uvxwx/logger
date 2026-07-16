@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes build-essential cmake ninja-build podman
+
+      - name: Show tool versions
+        run: |
+          cmake --version
+          ninja --version
+          gcc --version
+          g++ --version
+          make --version
+          sudo podman --version
+
+      - name: Build release
+        run: make build
+
+      - name: Build and test debug
+        run: make test
+
+      - name: Set image tags
+        id: image
+        run: |
+          image_repo=$(printf '%s\n' "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          sha_tag="${image_repo}:sha-${GITHUB_SHA}"
+          latest_tag="${image_repo}:latest"
+          printf 'repo=%s\n' "${image_repo}" >> "${GITHUB_OUTPUT}"
+          printf 'sha_tag=%s\n' "${sha_tag}" >> "${GITHUB_OUTPUT}"
+          printf 'latest_tag=%s\n' "${latest_tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Login to GHCR
+        run: |
+          printf '%s' '${{ secrets.GITHUB_TOKEN }}' | \
+            sudo podman login ghcr.io --username '${{ github.actor }}' --password-stdin
+
+      - name: Build OCI image
+        run: |
+          sudo podman build --format oci \
+            --tag '${{ steps.image.outputs.sha_tag }}' \
+            .
+
+      - name: Push OCI image
+        run: |
+          sudo podman push '${{ steps.image.outputs.sha_tag }}'
+          if [ '${{ github.ref_name }}' = '${{ github.event.repository.default_branch }}' ]; then
+            sudo podman tag '${{ steps.image.outputs.sha_tag }}' '${{ steps.image.outputs.latest_tag }}'
+            sudo podman push '${{ steps.image.outputs.latest_tag }}'
+          fi
