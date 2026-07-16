@@ -51,13 +51,17 @@ InputAction ParseInputLine(const std::string_view line) {
                                           : line.substr(0, first_space);
   auto parsed_level = ParseLogLevel(first_word);
   if (parsed_level.has_value()) {
+    if (first_space == std::string_view::npos ||
+        line.find_first_not_of(' ', first_space + 1U) ==
+            std::string_view::npos) {
+      return MakeInvalidAction("missing message after level: " +
+                               std::string{first_word});
+    }
+
     InputAction action;
     action.kind = InputActionKind::kLogMessage;
     action.log_command.level = *parsed_level;
-    action.log_command.message =
-        first_space == std::string_view::npos
-            ? ""
-            : std::string{line.substr(first_space + 1)};
+    action.log_command.message = std::string{line.substr(first_space + 1)};
     return action;
   }
 

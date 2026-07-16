@@ -49,6 +49,41 @@ TEST(ParseInputLineRecognizesCommandsAndLevels) {
   EXPECT_EQ(log_action.log_command.message, std::string{"hello world"});
 }
 
+// Проверяет ранний отказ для уровня без текста сообщения.
+TEST(ParseInputLineRejectsBareLevelToken) {
+  const logger::InputAction action = logger::ParseInputLine("debug");
+  EXPECT_EQ(action.kind, logger::InputActionKind::kInvalid);
+  EXPECT_EQ(action.error_message, std::string{"missing message after level: debug"});
+
+  const logger::InputAction spaced_action = logger::ParseInputLine("info   ");
+  EXPECT_EQ(spaced_action.kind, logger::InputActionKind::kInvalid);
+  EXPECT_EQ(spaced_action.error_message,
+            std::string{"missing message after level: info"});
+}
+
+// Проверяет, что ошибка разбора не превращается в ошибку фоновой записи.
+TEST(LoggerDemoRejectsBareLevelBeforeWriterThread) {
+  auto path = test::MakeTempPath("logger_demo_invalid_level_only");
+  std::istringstream input{"debug\n:quit\n"};
+  std::ostringstream output{};
+  std::ostringstream error{};
+
+  auto sink = logger::FileSink::Make(path);
+  EXPECT_TRUE(sink);
+
+  const int exit_code = logger::RunConsoleLogger(
+      input, output, error, std::move(sink.Value()), logger::LogLevel::kInfo);
+
+  const std::string content = test::ReadFile(path);
+  std::filesystem::remove(path);
+
+  EXPECT_EQ(exit_code, 0);
+  EXPECT_TRUE(output.str().empty());
+  EXPECT_CONTAINS(error.str(), "missing message after level: debug");
+  EXPECT_FALSE(error.str().find("log write failed") != std::string::npos);
+  EXPECT_TRUE(content.empty());
+}
+
 // Проверяет ошибку запуска консольного логгера без sink.
 TEST(LoggerDemoRejectsNullSink) {
   std::istringstream input{};
