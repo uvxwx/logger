@@ -24,16 +24,16 @@ Expected<void, Error> Logger::Log(const std::string_view message,
     return Error{LogError::kInvalidMessage};
   }
 
-  LogLevel current_min_level = min_level_.load();
-  if (SeverityRank(level) < SeverityRank(current_min_level)) {
-    return {};
-  }
-
   if (!sink_) {
     return Error{
         LogError::kInvalidArgument,
         "logger sink is null",
     };
+  }
+
+  LogLevel current_min_level = min_level_.load();
+  if (SeverityRank(level) < SeverityRank(current_min_level)) {
+    return {};
   }
 
   LogRecord record{

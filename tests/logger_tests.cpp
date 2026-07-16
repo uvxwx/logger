@@ -119,3 +119,14 @@ TEST(LoggerRejectsNullSink) {
   EXPECT_EQ(result.Error().code, logger::LogError::kInvalidArgument);
   EXPECT_EQ(result.Error().message.value(), std::string{"logger sink is null"});
 }
+
+// Проверяет, что отсутствие sink не маскируется фильтрацией по уровню.
+TEST(LoggerRejectsNullSinkEvenForFilteredMessage) {
+  logger::Logger logger{nullptr, logger::LogLevel::kError};
+
+  auto result = logger.Log("hidden", logger::LogLevel::kDebug);
+
+  EXPECT_FALSE(result);
+  EXPECT_EQ(result.Error().code, logger::LogError::kInvalidArgument);
+  EXPECT_EQ(result.Error().message.value(), std::string{"logger sink is null"});
+}
